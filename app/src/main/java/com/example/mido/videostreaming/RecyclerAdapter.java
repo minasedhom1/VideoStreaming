@@ -54,7 +54,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
         String vidAddress=list.get(position);
       //  holder.textView.setText(vidAddress);
          Uri vidUri = Uri.parse(vidAddress);
-        holder.videoView.setVideoURI(vidUri);
+         holder.videoView.setVideoURI(vidUri);
      //   holder.videoView.start();
 
 /*        holder.videoView.setOnClickListener(new View.OnClickListener() {
@@ -78,7 +78,9 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
        MediaController vidControl = new MediaController(context);
         vidControl.setAnchorView(holder.videoView);
         holder.videoView.setMediaController(vidControl);
-      //  holder.videoView.start();
+
+
+        //  holder.videoView.start();
     }
 
     @Override
