@@ -2,6 +2,7 @@ package com.example.mido.videostreaming;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.annotation.IntegerRes;
@@ -16,6 +17,10 @@ import android.widget.MediaController;
 import android.widget.Toast;
 import android.widget.VideoView;
 
+import com.squareup.picasso.Picasso;
+
+import java.util.List;
+
 /**
  * Created by Mina on 8/23/2017.
  */
@@ -23,18 +28,22 @@ import android.widget.VideoView;
 public class CustomPagerAdapter extends PagerAdapter {
 
     private Context context;
+    List<String> urls;
     private LayoutInflater layoutInflater;
-    private Integer [] images={ R.layout.custom_view,R.layout.custom_view,R.layout.popup_video};
+ //   private Integer [] images={ R.layout.custom_view,R.layout.custom_view,R.layout.popup_video};
 
 
-    public CustomPagerAdapter(Context context) {
+    public CustomPagerAdapter(Context context, List<String> urls) {
+        this.urls=urls;
         this.context = context;
     }
 
     @Override
     public int getCount() {
-        return images.length;
+        return urls.size();
     }
+
+
 
     @Override
     public boolean isViewFromObject(View view, Object object) {
@@ -43,23 +52,47 @@ public class CustomPagerAdapter extends PagerAdapter {
 
     @Override
     public Object instantiateItem(final ViewGroup container, final int position) {
-
+        View view;
         layoutInflater=(LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View view=layoutInflater.inflate(images[position],null);
-
-        if(images[position]== R.layout.custom_view)
+        if(position<urls.size()-1)
         {
+            view=layoutInflater.inflate(R.layout.custom_view,null);
             ImageView imageView= (ImageView) view.findViewById(R.id.imageView);
-            imageView.setImageResource(R.mipmap.ic_launcher_round);
+            Picasso.with(context).load(urls.get(position)).into(imageView);
+       //     imageView.setImageResource(urls.get(position));
         }
+
         else {
-            VideoView videoView = (VideoView) view.findViewById(R.id.videoView);
-            Uri vidUri = Uri.parse("https://archive.org/download/ksnn_compilation_master_the_internet/ksnn_compilation_master_the_internet_512kb.mp4");
+            view=layoutInflater.inflate(R.layout.popup_video,null);
+            final VideoView videoView = (VideoView) view.findViewById(R.id.videoView);
+            Uri vidUri = Uri.parse(urls.get(position));
             videoView.setVideoURI(vidUri);
-            MediaController vidControl = new MediaController(context);
+            final MediaController vidControl = new MediaController(context);
             vidControl.setAnchorView(videoView);
             videoView.setMediaController(vidControl);
+
+            videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mp) {
+                    // This is just to show image when loaded
+                    mp.start();
+                    mp.pause();
+                    mp.setOnVideoSizeChangedListener(new MediaPlayer.OnVideoSizeChangedListener() {
+                        @Override
+                        public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
+                            // Re-Set the videoView that acts as the anchor for the MediaController
+                            vidControl.setAnchorView(videoView);
+                        }
+                    });
+                }
+            });
         }
+        container.addView(view,0);
+        return view;
+
+
+
+
         /*ImageView imageView= (ImageView) view.findViewById(R.id.imageView);
         imageView.setImageResource(images[position]);
         container.addView(view,0);
@@ -83,8 +116,7 @@ public class CustomPagerAdapter extends PagerAdapter {
                 Toast.makeText(context,position + "of length: "+images.length,Toast.LENGTH_SHORT).show();
             }
         });*/
-        container.addView(view,0);
-        return view;
+
     }
 
     @Override
